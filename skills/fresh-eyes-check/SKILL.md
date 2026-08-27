@@ -45,7 +45,7 @@ is for scope you are extending.
 | "The user was clear" | Clear about that situation. Not about this one. |
 | "It is the same situation" | That is what you cannot see from inside. |
 | "Asking will annoy them" | One question; the scope is recorded and never re-asked. Guessing wrong costs more. |
-| "No time" | One call, one reply. |
+| "No time" | One call, one reply. Undoing a misapplied rule costs more. |
 | "It is in memory, so it is settled" / "The constraint rules out X" | A rule records the scope it was written for. Beyond it you are extending, not following. |
 | "Constraint respected" | Obeying the rule is not the deliverable. The user's goal is. |
 | "This column is exactly the escape hatch built for this" | A slot for the workaround does not make it the design. |
