@@ -137,9 +137,13 @@ evals/results/2026-08-27-codex-blind-run.md  the context-free reference
                                              answer, with the brief sent
 evals/results/2026-08-27-fence-probes.md     measured behaviour of the
                                              runtime isolation flags
+evals/results/2026-08-27-green-and-negative.md
+                                             GREEN: one actor, skill
+                                             present; the still-valid
+                                             negative case; and a
+                                             description-only trigger
+                                             spot-check
 ```
 
-Still to be recorded, using the same date-prefixed naming:
-`<date>-stale-instruction-green.md` and `<date>-still-valid.md`. Any claim
-the top-level README makes about the skill must be backed by a file in
-this directory.
+Further runs use the same date-prefixed naming. Any claim the top-level
+README makes about the skill must be backed by a file in this directory.
