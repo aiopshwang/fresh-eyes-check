@@ -1,0 +1,21 @@
+{
+  "name": "fresh-eyes-check",
+  "interface": {
+    "displayName": "Fresh Eyes Check"
+  },
+  "plugins": [
+    {
+      "name": "fresh-eyes-check",
+      "version": "0.1.0",
+      "source": {
+        "source": "url",
+        "url": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
