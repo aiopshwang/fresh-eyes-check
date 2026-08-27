@@ -1,10 +1,11 @@
 # Fence probes: runtime isolation flags
 
-This is a bounded record, not a benchmark. Single run, Sonnet actors, the
-controller authored both the skill plan and the test. It keeps the measured
-behaviour of the CLI flags the skill relies on to hand a second model a
-clean context, so that the flags named in the skill are ones that were seen
-to work rather than ones that sound right.
+This is a bounded record, not a benchmark. Single run; the controller ran
+the probes by hand; no actor model was involved. The controller authored
+both the skill plan and the test. It keeps the measured behaviour of the
+CLI flags the skill relies on to hand a second model a clean context, so
+that the flags named in the skill are ones that were seen to work rather
+than ones that sound right.
 
 ## Run identity
 
