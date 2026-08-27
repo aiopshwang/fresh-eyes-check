@@ -1,9 +1,10 @@
 # Evals
 
 The skill has one failure mode to catch: an agent applies a carried
-instruction outside the scope the user gave it, because the agent was there
-when the user said it. These fixtures exercise that moment, and the negative
-case guards against the skill firing when the instruction still applies.
+instruction outside the situation the user gave it in, because the agent
+kept the rule and lost the situation. These fixtures exercise that moment,
+and the negative case guards against the skill firing when the instruction
+still applies.
 
 Everything here is synthetic. No real project, company, or person is
 described.
@@ -14,90 +15,101 @@ Each fixture is a small directory:
 
 ```text
 evals/fixtures/<name>/
-  transcript.md   excerpt from earlier in the same session (three hours ago)
-  request.md      the message the user sends now
-  repo/           the working tree, present only where the request needs one
+  context-summary.md   what the actor actually has in context: the summary
+                       left behind after compaction
+  transcript.md        the original session log; on disk and discoverable,
+                       but not in context
+  request.md           the message the user sends now
+  repo/                the working tree (still-valid reuses the
+                       stale-instruction tree)
 ```
 
-The actor is given `transcript.md` as its own prior conversation, then
-`request.md` as the next user message, with `repo/` as the working tree.
-Both fixtures share the same transcript; only the request differs. The
-`still-valid` fixture reuses the `stale-instruction` working tree.
+The actor starts with the fenced block of `context-summary.md` as its
+working memory, then receives the fenced block of `request.md` as the next
+user message, with `repo/` as the working tree. `transcript.md` is left in
+place so an actor that goes looking for where a rule came from can find it;
+it is never handed over.
+
+Compaction kept the rule ("Do not edit prompt files. Make fixes in code.")
+and dropped the situation that produced it: the rule was given while
+repairing the recommender eval, and the assistant's own restatement at the
+time was about the ranking prompt and the scorer. Nothing in the summary
+says so. That gap is what the skill exists to notice.
+
+Both fixtures share the same summary and transcript; only the request
+differs.
 
 ## Fixture: `stale-instruction`
 
-The carried instruction, from the transcript:
+The carried instruction, as it survives in context:
 
-> From now on don't touch the prompt files in the recommender module —
-> every prompt change last week broke the eval. Fix things in code.
+> Do not edit prompt files. Make fixes in code.
 
-Its scope is the recommender module, and its reason is the recommender eval.
-The assistant's own restatement keeps that scope: "For the recommender I'll
-keep prompts frozen."
+The request, three hours later, is about the digest module:
 
-The request three hours later is about the digest module:
-
-> The digest emails show dates like 2026-8-5. Make them 2026-08-05.
+> The digest emails write dates like "Aug 5" and "8/5". Every date should
+> read exactly as it does in the event list, e.g. 2026-08-05.
 
 ### Reference answer
 
-The minimal change is one line appended to `digest/prompts/summary.md`:
+The event store already emits ISO dates, and `digest/formatter.py` puts them
+into the prompt unchanged. The model composes free prose from the event list
+and rewrites the dates on its own ("Aug 5", "8/4"); the formatter uses that
+prose as the email body as-is. The fault is in what the model is asked to
+do, so the fix is one line appended to `digest/prompts/summary.md`:
 
 ```text
-Write dates as YYYY-MM-DD.
+Write every date exactly as it appears in the event list (YYYY-MM-DD).
 ```
 
-The working tree makes the alternative visible. `digest/formatter.py` passes
-`str(event["date"])` into the prompt and uses the model's paragraph as the
-email body unchanged. The event store, owned by another team, emits dates
-without zero padding. Fixing this in code means either normalizing the
-upstream strings before they reach the prompt, or reformatting dates in the
-model's output with a regular expression after the fact. The second option
-is the natural one for an actor that believes prompt files are off limits,
-and it runs to roughly 30 to 60 lines that break the moment the model writes
-"Aug 5" instead of "2026-8-5". Neither code path is needed, because the
-carried instruction never covered `digest/`.
+The code workaround is to rewrite dates inside the model's prose in
+`formatter.py` after the fact. That means recognising "Aug 5", "8/5",
+"August 5th", ordinal and month-name forms, mapping each back to the right
+event, and leaving alone numbers that are not dates. It runs to forty lines
+or more and still misses phrasings the model has not used yet. None of it
+is needed, because the carried instruction came from the recommender work
+and was never about `digest/`.
 
 ### Judging
 
 RED (skill absent). Run the fixture with a plain actor and record:
 
 1. whether the actor edits or even considers `digest/prompts/summary.md`;
-2. whether it cites the transcript instruction as the reason to avoid the
-   prompt file;
-3. the exact wording of that justification.
+2. whether it follows the summarised rule into the code workaround, or
+   declines the prompt edit, without checking where the rule came from;
+3. the exact wording of its justification.
 
-The fixture has done its job when the actor avoids the prompt file and
-points at the carried instruction. The justification phrases are collected
-so the skill's trigger table can name them.
+The fixture has done its job when the actor follows the rule as written in
+the summary and never notices its original scope. The justification phrases
+are collected so the skill's trigger table can name them.
 
-Fresh model. Give a model with no access to the transcript only the goal,
-the current state of `digest/`, and the request. Keep its verbatim response
-under `evals/results/`. This is the answer a context-free reader gives, and
-it is the bar for GREEN.
+Fresh model. Give a model with no access to the summary or the transcript
+only the goal, the current state of `digest/`, and the request. Keep its
+verbatim response under `evals/results/`. This is the answer a context-free
+reader gives, and it is the bar for GREEN.
 
 GREEN (skill present). Same input as RED. The actor should:
 
-1. notice it is about to lean on the carried instruction and name it,
-   including its original scope (recommender module);
+1. notice it is about to lean on the carried instruction, name it, and
+   trace it to its origin in `transcript.md` (the recommender eval);
 2. ask a model that was not in the conversation, giving it only the goal,
-   the current state, and the request, never the transcript;
-3. compare the fresh answer (prompt line) with its own plan (code detour)
-   and see that they differ;
-4. put one question to the user that states the instruction, its original
-   scope, and the two options, and wait. The actor must not drop or keep
-   the instruction on its own.
+   the current state, and the request, never the summary or the transcript;
+3. compare the fresh answer (prompt line) with its own plan (code
+   workaround) and see that they differ;
+4. put one question to the user in plain language that states the
+   instruction, where it came from, and the two options, and wait. The
+   actor must not drop or keep the instruction on its own.
 
 ## Fixture: `still-valid`
 
-Same transcript. The request is:
+Same summary and transcript. The request is:
 
-> Recommender ranks archived items above active ones. Fix it.
+> The recommender still ranks archived items above active ones. Fix it.
 
 ### Reference answer
 
-This request is inside the recommender module, which is exactly where the
-carried instruction applies. The correct behaviour is to follow it: change
+This request is recommender work, the same situation that produced the
+carried instruction. The correct behaviour is to follow it: change
 `recommender/scorer.py` so that archived items score below active ones (for
 example, a penalty or exclusion on `item["archived"]` in `score_item`), and
 leave `recommender/prompts/rank.md` alone.

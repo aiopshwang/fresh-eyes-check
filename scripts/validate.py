@@ -8,6 +8,9 @@
 (b) every relative link in every Markdown file resolves inside the repo.
 (c) the three plugin manifests parse as JSON and agree on ``version``.
 (d) no file and no commit message carries a co-author trailer.
+(e) every ``skills`` path named in a manifest resolves to at least one
+    ``SKILL.md``; ``--allow-no-skills`` downgrades this check to a warning
+    for the scaffold stage before the skill exists.
 
 Exits 1 on any failure. The last line is ``PASS: N checks`` or
 ``FAIL: M failures (N checks)``. Warnings are printed but never fail the run.
@@ -15,6 +18,7 @@ Exits 1 on any failure. The last line is ``PASS: N checks`` or
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import subprocess
@@ -136,8 +140,10 @@ def check_links() -> None:
     print(f"links: {count} relative link(s) checked")
 
 
-def check_manifests() -> None:
+def check_manifests() -> list[tuple[str, str]]:
+    """Parse the manifests, compare versions, and return their skills paths."""
     versions: dict[str, set[str]] = {}
+    refs: list[tuple[str, str]] = []
     for name in MANIFESTS:
         try:
             data = json.loads((ROOT / name).read_text(encoding="utf-8"))
@@ -147,11 +153,29 @@ def check_manifests() -> None:
         check(True, name)
         entries = data.get("plugins", [data]) if isinstance(data, dict) else []
         versions[name] = {str(e.get("version")) for e in entries if isinstance(e, dict)}
+        for entry in entries:
+            skills = entry.get("skills") if isinstance(entry, dict) else None
+            skills = [skills] if isinstance(skills, str) else skills or []
+            refs += [(name, s) for s in skills if isinstance(s, str)]
     if len(versions) == len(MANIFESTS):
         flat = set().union(*versions.values())
         detail = ", ".join(f"{k}={'/'.join(sorted(v)) or '?'}" for k, v in versions.items())
         check(len(flat) == 1 and "None" not in flat, f"manifest versions disagree: {detail}")
-    print(f"manifests: {len(versions)} of {len(MANIFESTS)} parsed")
+    print(f"manifests: {len(versions)} of {len(MANIFESTS)} parsed, {len(refs)} skills path(s)")
+    return refs
+
+
+def check_skill_paths(refs: list[tuple[str, str]], allow_missing: bool) -> None:
+    for manifest, ref in refs:
+        base = ROOT / ref
+        found = (base / "SKILL.md").is_file() or any(base.glob("*/SKILL.md"))
+        message = f"{manifest}: skills path {ref!r} resolves to no SKILL.md"
+        if found:
+            check(True, message)
+        elif allow_missing:
+            warnings.append(f"{message} (tolerated by --allow-no-skills)")
+        else:
+            check(False, message)
 
 
 def check_trailer() -> None:
@@ -171,9 +195,13 @@ def check_trailer() -> None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description="Validate the repository.")
+    parser.add_argument("--allow-no-skills", action="store_true",
+                        help="warn instead of fail when a manifest skills path has no SKILL.md")
+    args = parser.parse_args()
     check_skills()
     check_links()
-    check_manifests()
+    check_skill_paths(check_manifests(), args.allow_no_skills)
     check_trailer()
     for warning in warnings:
         print(f"WARN: {warning}")

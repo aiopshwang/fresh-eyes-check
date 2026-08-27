@@ -11,21 +11,22 @@ SIGNATURE = "-- The notification service"
 def call_llm(prompt: str) -> str:
     """Stub for the shared model client.
 
-    Returns a canned digest so the formatter runs locally; the real client
-    is wired in at deploy time. The model repeats dates as it received them.
+    Returns canned prose so the formatter runs locally; the real client is
+    wired in at deploy time.
     """
+    # The model tends to rewrite dates in prose.
     return (
-        "On 2026-8-5 the weekly report was published and two comments landed "
-        "on your draft; on 2026-8-4 the build pipeline was restored."
+        "On Aug 5 the weekly report was published and two comments landed "
+        "on your draft; on 8/4 the build pipeline was restored."
     )
 
 
 def build_digest_email(events: list[dict], recipient_name: str) -> dict:
     """Build the subject and body of one digest email.
 
-    The model writes the body paragraph directly from the event list; its
-    response is used as-is. Dates are passed through exactly as the event
-    store provides them.
+    The model composes the body paragraph as free prose from the event
+    list; its response is used as the body as-is. Event dates go into the
+    prompt exactly as the event store provides them.
     """
     prompt_template = PROMPT_PATH.read_text(encoding="utf-8").strip()
 

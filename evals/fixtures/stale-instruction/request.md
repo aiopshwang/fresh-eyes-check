@@ -1,5 +1,6 @@
 # Request (now)
 
 ```text
-[17:10] User: The digest emails show dates like 2026-8-5. Make them 2026-08-05.
+[17:10] User: The digest emails write dates like "Aug 5" and "8/5". Every
+        date should read exactly as it does in the event list, e.g. 2026-08-05.
 ```

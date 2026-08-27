@@ -1,6 +1,5 @@
 {
   "name": "fresh-eyes-check",
-  "displayName": "Fresh Eyes Check",
   "version": "0.1.0",
   "description": "Ask a model that was not in the conversation whether a carried instruction still fits the situation before you act on it.",
   "author": {
