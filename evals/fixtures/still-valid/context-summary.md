@@ -1,18 +1,10 @@
-# Context summary
-
-What the actor has in its working context: the summary an agent keeps after
-compaction. The session that produced it is in `transcript.md`.
-
-```text
 # Session context (auto-generated summary after compaction)
 
-Project: notification service — daily digest emails built from events;
-recommender ranking.
+Project: accounts-service (users, orders, notifications).
 
-Work so far: fixed the recommender scorer after an eval regression.
+Work so far: hot-fixed production after a bad release; the release is stable.
 
 Constraints from user:
-- Do not edit prompt files. Make fixes in code.
+- Do not change the database schema. Handle data changes in application code.
 
 Open items: none.
-```

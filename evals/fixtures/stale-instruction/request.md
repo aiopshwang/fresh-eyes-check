@@ -1,6 +1,3 @@
-# Request (now)
-
-```text
-[17:10] User: The digest emails write dates like "Aug 5" and "8/5". Every
-        date should read exactly as it does in the event list, e.g. 2026-08-05.
-```
+[16:20] User: Users need notification preferences: which channel (email or
+        SMS) and quiet hours (a start and end time). Add it so the
+        notifications module can respect them.

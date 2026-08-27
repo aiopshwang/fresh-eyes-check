@@ -1,6 +1,2 @@
-# Request (now)
-
-```text
-[17:10] User: The recommender still ranks archived items above active ones.
-        Fix it.
-```
+[16:20] User: The weekly orders report should label status "placed" as
+        "Pending". Change that.

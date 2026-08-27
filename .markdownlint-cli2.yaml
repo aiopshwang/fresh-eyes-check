@@ -3,6 +3,9 @@ config:
   MD024:
     siblings_only: true
   MD033: false
-# Fixture repositories are synthetic project content, not documentation.
+# Fixture repositories are synthetic project content, not documentation, and
+# the fixture payload files (context summary, transcript, request) are handed
+# to actors verbatim, so neither is linted as documentation.
 ignores:
   - "evals/fixtures/*/repo/**"
+  - "evals/fixtures/*/*.md"
