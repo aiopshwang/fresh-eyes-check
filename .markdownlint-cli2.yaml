@@ -1,0 +1,8 @@
+config:
+  MD013: false
+  MD024:
+    siblings_only: true
+  MD033: false
+# Fixture repositories are synthetic project content, not documentation.
+ignores:
+  - "evals/fixtures/*/repo/**"

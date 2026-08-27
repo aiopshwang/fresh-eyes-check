@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "fresh-eyes-check",
+  "description": "Catch carried-instruction bias with a context-free second model.",
+  "owner": { "name": "aiopshwang", "url": "https://github.com/aiopshwang" },
+  "plugins": [
+    {
+      "name": "fresh-eyes-check",
+      "source": "./",
+      "description": "Ask a model that was not in the conversation whether a carried instruction still fits before you act on it.",
+      "version": "0.1.0",
+      "author": { "name": "aiopshwang" },
+      "license": "MIT",
+      "category": "productivity",
+      "skills": ["./skills/fresh-eyes-check"]
+    }
+  ]
+}
