@@ -71,7 +71,7 @@ Codex에서는 `$fresh-eyes-check`로 호출합니다. Codex 패키징은 OpenAI
 
 ## 런타임
 
-이 스킬은 두 번째 모델에게 브리핑을 CLI로 건넵니다. 대화, 지시 파일, 사용자 자신의 설정이 들어가지 않도록 막는다고 측정된 플래그만 씁니다. 커맨드가 둘인 이유는 둘을 측정했기 때문입니다(codex-cli 0.150.0, Claude Code 2.1.152, Windows 11).
+이 스킬은 두 번째 모델에게 브리핑을 CLI로 건넵니다. 대화, 지시 파일, 사용자 자신의 설정을 막는 울타리는 플래그입니다. 지시 파일 울타리와 쓰기 울타리는 측정했습니다(codex-cli 0.150.0, Claude Code 2.1.152, Windows 11). Codex 커맨드는 처음부터 끝까지 실행했고, Claude Code 커맨드는 울타리 플래그를 개별로 프로브했을 뿐 적힌 커맨드라인 그대로 끝까지 실행하지는 않았습니다.
 
 Claude Code가 Codex에게 묻는 경우:
 
@@ -89,7 +89,7 @@ claude -p --setting-sources "" --disable-slash-commands \
   --max-budget-usd <n> --model <model> < brief.txt
 ```
 
-울타리는 프롬프트 속 부탁이 아니라 플래그입니다. Codex 쪽에서는 `-c project_doc_max_bytes=0`이 `AGENTS.md` 로드를 막는 실제 스위치이고(`--ignore-rules`는 아닙니다 — 새는 것이 측정되었습니다), `--ignore-user-config`와 `--ephemeral`이 사용자 설정과 세션 기록을 막으며, `-s read-only`가 쓰기를 거부합니다. Claude Code 쪽에서는 `--setting-sources ""`가 모든 `CLAUDE.md`를 떨어뜨리고, `--disable-slash-commands`가 스킬을 없애며, `--max-budget-usd`와 모델 지정은 필수입니다. 상태는 브리핑이 직접 실어 나릅니다. 최대 다섯 파일, 전문 붙여넣기, 파일당 최대 200줄이며, 모델에게 저장소 접근 권한은 주지 않습니다. Windows에서는 Codex의 read-only 샌드박스가 쓰기뿐 아니라 셸 읽기까지 막기 때문에, 저장소를 보라고 하면 모델은 추측으로 답합니다. 그래서 `-C`는 빈 디렉터리를 가리킵니다.
+울타리는 프롬프트 속 부탁이 아니라 플래그입니다. Codex 쪽에서는 `-c project_doc_max_bytes=0`이 `AGENTS.md` 로드를 막는 실제 스위치이고(`--ignore-rules`는 아닙니다 — 새는 것이 측정되었습니다), `--ignore-user-config`와 `--ephemeral`이 사용자 설정과 세션 기록을 막도록 문서화되어 있으며, `-s read-only`가 쓰기를 거부합니다. Claude Code 쪽에서는 `--setting-sources ""`가 모든 `CLAUDE.md`를 떨어뜨리고, `--disable-slash-commands`가 스킬을 없애며, `--max-budget-usd`와 모델 지정은 필수입니다. 상태는 브리핑이 직접 실어 나릅니다. 최대 다섯 파일, 전문 붙여넣기, 파일당 최대 200줄이며, 모델에게 저장소 접근 권한은 주지 않습니다. Windows에서는 Codex의 read-only 샌드박스가 쓰기뿐 아니라 셸 읽기까지 막기 때문에, 저장소를 보라고 하면 모델은 추측으로 답합니다. 그래서 `-C`는 빈 디렉터리를 가리킵니다.
 
 플래그별 설명과 각 플래그 뒤의 측정, 대체 규칙은 [runtime-recipes.md](skills/fresh-eyes-check/references/runtime-recipes.md)에 있습니다. 브리핑 템플릿은 [blind-brief.md](skills/fresh-eyes-check/references/blind-brief.md), 사용자 질문 템플릿은 [owner-question.md](skills/fresh-eyes-check/references/owner-question.md)입니다.
 

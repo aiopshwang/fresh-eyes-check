@@ -17,7 +17,8 @@ All notable changes to Fresh Eyes Check are documented in this file. The format 
   its brief verbatim, the fence probes that measured the runtime isolation
   flags, and the GREEN and negative-case run with the description
   spot-check.
-- Claude Code and Codex plugin manifests for `fresh-eyes-check` (0.1.0).
+- Claude Code plugin and marketplace manifests; Codex plugin manifest and
+  marketplace catalog.
 - Repository scaffold: MIT license, `scripts/validate.py` (dependency-free
   checks for skill frontmatter, relative Markdown links, manifest agreement,
   and commit hygiene), Markdown lint configuration, and CI validation

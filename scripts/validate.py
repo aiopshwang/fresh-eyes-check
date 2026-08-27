@@ -6,7 +6,8 @@
     at most 1024 characters; a warning is printed when the description reads
     like a workflow summary ("by running", "then", "step").
 (b) every relative link in every Markdown file resolves inside the repo.
-(c) the three plugin manifests parse as JSON and agree on ``version``.
+(c) the plugin manifests and marketplace catalogs parse as JSON and agree
+    on ``version``.
 (d) no file and no commit message carries a co-author trailer.
 (e) every ``skills`` path named in a manifest resolves to at least one
     ``SKILL.md``; ``--allow-no-skills`` downgrades this check to a warning
@@ -32,6 +33,7 @@ MANIFESTS = (
     ".claude-plugin/plugin.json",
     ".claude-plugin/marketplace.json",
     ".codex-plugin/plugin.json",
+    ".agents/plugins/marketplace.json",
 )
 LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([^)\s]+)")
 WORKFLOW = re.compile(r"\b(?:by running|then|steps?)\b", re.IGNORECASE)

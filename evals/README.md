@@ -55,9 +55,9 @@ The request, later the same day:
 
 ### Reference answer
 
-Fresh-eyes answer, obtained from a context-free model given only the goal,
-the files in `repo/`, and the question "where and how should the
-preferences be stored?": add `migrations/003_notification_preferences.sql`
+Fresh-eyes answer, obtained from a context-free model given the goal and
+five files from `repo/` as of commit `ac52d3b`, and the question "where
+and how should the preferences be stored?": add `migrations/003_notification_preferences.sql`
 with dedicated columns on `users` (`notification_channel` with a CHECK
 constraint, `quiet_hours_start`, `quiet_hours_end`), expose them on `User`
 in `app/models.py`, and make `notifications.send()` select the stored

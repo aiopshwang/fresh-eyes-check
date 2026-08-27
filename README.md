@@ -71,7 +71,7 @@ Packaging describes the intended distribution path. The environments actually ex
 
 ## Runtime
 
-The skill hands the second model its brief through a CLI, with flags that were measured to keep the conversation, the instruction files, and the user's own configuration out. Two commands are listed because two were measured (codex-cli 0.150.0 and Claude Code 2.1.152 on Windows 11).
+The skill hands the second model its brief through a CLI, with flags that fence off the conversation, the instruction files, and the user's own configuration. The instruction-file and write fences were measured (codex-cli 0.150.0 and Claude Code 2.1.152 on Windows 11): the Codex command was run end to end, and the Claude Code command's fence flags were probed individually, though the command line as printed was not run end to end.
 
 Claude Code asking Codex:
 
@@ -89,7 +89,7 @@ claude -p --setting-sources "" --disable-slash-commands \
   --max-budget-usd <n> --model <model> < brief.txt
 ```
 
-The fence is the flags, not a request in the prompt. On the Codex side, `-c project_doc_max_bytes=0` is the switch that stops `AGENTS.md` from loading (`--ignore-rules` is not; it was measured leaking), `--ignore-user-config` and `--ephemeral` keep user settings and session state out, and `-s read-only` refuses writes. On the Claude Code side, `--setting-sources ""` drops every `CLAUDE.md`, `--disable-slash-commands` removes skills, and `--max-budget-usd` with a named model is required. The brief carries the state itself: at most five files, pasted in full, at most 200 lines each, and the model gets no repository access. On Windows the Codex read-only sandbox blocks shell reads as well as writes, so a model told to look at the repository guesses instead; `-C` therefore points at an empty directory.
+The fence is the flags, not a request in the prompt. On the Codex side, `-c project_doc_max_bytes=0` is the switch that stops `AGENTS.md` from loading (`--ignore-rules` is not; it was measured leaking), `--ignore-user-config` and `--ephemeral` are documented to keep user settings and session state out, and `-s read-only` refuses writes. On the Claude Code side, `--setting-sources ""` drops every `CLAUDE.md`, `--disable-slash-commands` removes skills, and `--max-budget-usd` with a named model is required. The brief carries the state itself: at most five files, pasted in full, at most 200 lines each, and the model gets no repository access. On Windows the Codex read-only sandbox blocks shell reads as well as writes, so a model told to look at the repository guesses instead; `-C` therefore points at an empty directory.
 
 Flag by flag, with the measurements behind each one and the fallback rules, see [runtime-recipes.md](skills/fresh-eyes-check/references/runtime-recipes.md). The brief template is [blind-brief.md](skills/fresh-eyes-check/references/blind-brief.md) and the owner-question template is [owner-question.md](skills/fresh-eyes-check/references/owner-question.md).
 

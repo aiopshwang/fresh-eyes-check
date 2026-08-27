@@ -19,7 +19,9 @@ Inside original scope?        yes -> follow it and stop
 If "Original situation and scope" is blank because you only have a
 compaction summary, that blank is the finding: the words survived and the
 situation did not. Open the session log or the memory file the words came
-from before you answer the last line.
+from before you answer the last line. If the source is gone (a memory rule
+without its how-to-apply, a rotated log), treat the scope as unknown and
+run the check.
 
 Worked example, from the `stale-instruction` fixture:
 

@@ -1,6 +1,10 @@
 # Runtime recipes
 
-Only flags that were measured to work are listed. The measurements are in
+The flags that carry the fence were measured: `-c project_doc_max_bytes=0`,
+`-s read-only`, `--setting-sources ""`, `--tools`, `--model`. The others
+(`--ignore-user-config`, `--ephemeral`, `--no-session-persistence`,
+`--disable-slash-commands`) are documented CLI behaviour included in the
+command line but not individually probed. The measurements are in
 [2026-08-27-fence-probes.md](../../../evals/results/2026-08-27-fence-probes.md);
 the run that used the Codex recipe end to end is in
 [2026-08-27-codex-blind-run.md](../../../evals/results/2026-08-27-codex-blind-run.md).
@@ -22,8 +26,8 @@ codex exec -s read-only --ignore-user-config --ephemeral \
 | Flag | What it does |
 | --- | --- |
 | `-s read-only` | The sandbox refuses writes. On Windows it refuses shell reads as well, which is why the brief carries the files |
-| `--ignore-user-config` | `$CODEX_HOME/config.toml` is not loaded: no user settings, no user skills |
-| `--ephemeral` | No session record is kept |
+| `--ignore-user-config` | `$CODEX_HOME/config.toml` is not loaded: no user settings, no user skills (documented, not probed) |
+| `--ephemeral` | No session record is kept (documented, not probed) |
 | `-c project_doc_max_bytes=0` | The switch that stops `AGENTS.md` from loading. Without it the canary file was loaded |
 | `--skip-git-repo-check` | Lets the run start in a directory that is not a repository |
 | `-C <any empty dir>` | Nothing to find, even if the model looks |
@@ -48,9 +52,9 @@ claude -p --setting-sources "" --disable-slash-commands \
 | Flag | What it does |
 | --- | --- |
 | `--setting-sources ""` | No user, project, or local settings, so no `CLAUDE.md`. The probe reply said "No CLAUDE.md loaded" |
-| `--disable-slash-commands` | No skills |
+| `--disable-slash-commands` | No skills (documented, not probed) |
 | `--tools "Read,Glob,Grep"` | Read tools only; no write tool exists in the run. The brief still carries the files; the tools are a backstop, not the channel |
-| `--no-session-persistence` | No session record is kept |
+| `--no-session-persistence` | No session record is kept (documented, not probed) |
 | `--max-budget-usd <n>` | Required. The default model under a `$0.10` cap stopped before replying, on system-prompt cost alone |
 | `--model <model>` | Name a smaller model; `sonnet` was measured |
 
