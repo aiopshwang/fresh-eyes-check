@@ -1,6 +1,7 @@
 # Blind Codex run: `stale-instruction` reference answer
 
-This is a bounded record, not a benchmark. Single run, Sonnet actors, the
+This is a bounded record, not a benchmark. Single run; the fresh-eyes
+model was Codex (default model for codex-cli 0.150.0, id not captured); the
 controller authored both the skill plan and the test. It preserves the
 context-free answer that `evals/README.md` cites as the reference for the
 `stale-instruction` fixture, together with the exact invocation, so the
@@ -11,8 +12,10 @@ answer can be re-obtained and compared.
 - **Date:** 2026-08-27
 - **Fixture:** `evals/fixtures/stale-instruction/` as committed at
   `ac52d3b` (fixtures v3)
-- **Runner:** codex-cli 0.150.0, `codex exec`, default model for that
-  build; no model flag was passed. Orchestrated from Claude Code 2.1.152
+- **Runner:** codex-cli 0.150.0 (measured with `codex --version`),
+  `codex exec`, default model for that build; no model flag was passed and
+  the model id was not captured from the run. Orchestrated from Claude
+  Code 2.1.152 (controller-measured with `claude --version`)
 - **Context given:** none beyond the brief below. No conversation history,
   no `context-summary.md`, no `transcript.md`, no instruction files, no
   file access

@@ -13,8 +13,10 @@ outside its situation) rests on something observed rather than assumed.
   `ac52d3b` (fixtures v3)
 - **Skill under test:** none. This is the RED half of the eval; the skill
   had not been written
-- **Acting runners:** two independent Sonnet-model subagents
-  (claude-sonnet-5) dispatched from Claude Code 2.1.152, one response each
+- **Acting runners:** two independent Sonnet 5 subagents, dispatched with
+  model alias `sonnet`; exact model id not captured from the run. Dispatched
+  from Claude Code 2.1.152 (controller-measured with `claude --version`),
+  one response each
 - **Evaluator:** the orchestrating controller judged the responses against
   the RED criteria in `evals/README.md`. The controller also authored the
   fixture and the skill plan, so the evaluation is not independent
@@ -113,7 +115,8 @@ does.
 
 ## Limitations
 
-- Two responses from one actor model on one fixture. No statistical claim
+- Two responses from one actor model (Sonnet 5 via alias `sonnet`; exact
+  model id not captured) on one fixture. No statistical claim
   of any kind; this shows the fixture can produce the failure, not how
   often it does.
 - The actors answered in prose without executing anything, so this records

@@ -10,8 +10,9 @@ to work rather than ones that sound right.
 
 - **Date:** 2026-08-25 (probes); re-used unchanged for the runs recorded on
   2026-08-27
-- **Runners probed:** codex-cli 0.150.0 (`codex exec`) and Claude Code
-  2.1.152 (`claude -p`)
+- **Runners probed:** codex-cli 0.150.0 (`codex exec`; measured with
+  `codex --version`) and Claude Code 2.1.152 (`claude -p`;
+  controller-measured with `claude --version` on 2026-08-25)
 - **Platform:** Windows 11, PowerShell host; OneDrive-synced working
   directory and a scratch directory without spaces were both used
 - **Evaluator:** the controller read each reply and checked for the canary
