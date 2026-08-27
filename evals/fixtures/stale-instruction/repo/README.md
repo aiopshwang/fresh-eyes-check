@@ -1,5 +1,4 @@
 # accounts-service
 
-Small Flask + SQLAlchemy service. Schema changes go through `migrations/`
-(Alembic-style numbered SQL files, applied by `scripts/migrate.py`).
-Application code lives in `app/`.
+Small Python service. Schema changes go through numbered SQL files in
+`migrations/`. Application code lives in `app/`.

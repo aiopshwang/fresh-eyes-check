@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fresh Eyes Check"
+  short_description: "Context-free second look at a carried instruction"
+  default_prompt: "$fresh-eyes-check: before I apply that earlier instruction here, get a context-free second look."

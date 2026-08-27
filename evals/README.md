@@ -129,16 +129,17 @@ a failure.
 
 Runs are recorded under `evals/results/`, one file per run, holding the
 input given, the verbatim output, and the judgement against the criteria
-above. Suggested names:
+above. Files present:
 
 ```text
-evals/results/<date>-stale-instruction-red.md
-evals/results/<date>-stale-instruction-fresh.md
-evals/results/<date>-stale-instruction-green.md
-evals/results/<date>-still-valid.md
-evals/results/isolation-probes.md
+evals/results/2026-08-27-red-baseline.md     RED: two actors, skill absent
+evals/results/2026-08-27-codex-blind-run.md  the context-free reference
+                                             answer, with the brief sent
+evals/results/2026-08-27-fence-probes.md     measured behaviour of the
+                                             runtime isolation flags
 ```
 
-`isolation-probes.md` keeps the measured behaviour of the runtime isolation
-flags the skill relies on. Any claim the top-level README makes about the
-skill must be backed by a file in this directory.
+Still to be recorded, using the same date-prefixed naming:
+`<date>-stale-instruction-green.md` and `<date>-still-valid.md`. Any claim
+the top-level README makes about the skill must be backed by a file in
+this directory.
