@@ -52,6 +52,43 @@ class ArmTest(unittest.TestCase):
                                     if item not in {"--plugin-dir", str(REPO_ROOT)}])
 
 
+class StagedPluginTest(unittest.TestCase):
+    """The experiment varies one line; the committed skill must not move."""
+
+    SKILL = "skills/fresh-eyes-check/SKILL.md"
+    PROBE = "Use when the sky is green."
+
+    def _stage(self, description):
+        import tempfile
+        self._temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._temp.cleanup)
+        return run_ab.staged_plugin(REPO_ROOT, description, Path(self._temp.name) / "p")
+
+    def test_description_is_replaced_in_the_copy_only(self):
+        staged = self._stage(self.PROBE)
+        copied = (staged / self.SKILL).read_text(encoding="utf-8")
+        original = (REPO_ROOT / self.SKILL).read_text(encoding="utf-8")
+        self.assertIn(f"description: {self.PROBE}", copied)
+        self.assertNotIn(self.PROBE, original)
+
+    def test_body_below_the_frontmatter_is_untouched(self):
+        staged = self._stage(self.PROBE)
+        copied = (staged / self.SKILL).read_text(encoding="utf-8")
+        original = (REPO_ROOT / self.SKILL).read_text(encoding="utf-8")
+        self.assertEqual(copied.split("---", 2)[2], original.split("---", 2)[2])
+
+    def test_no_description_means_an_unmodified_copy(self):
+        staged = self._stage(None)
+        self.assertEqual(
+            (staged / self.SKILL).read_text(encoding="utf-8"),
+            (REPO_ROOT / self.SKILL).read_text(encoding="utf-8"),
+        )
+
+    def test_a_multiline_description_is_refused(self):
+        with self.assertRaises(ValueError):
+            self._stage("first line\nsecond line")
+
+
 class RubricTest(unittest.TestCase):
     def test_rubric_covers_the_three_metrics(self):
         rubric = run_ab.load_rubric(REPO_ROOT)

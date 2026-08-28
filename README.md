@@ -69,6 +69,18 @@ In Codex the skill is invoked as `$fresh-eyes-check`. Codex marketplace packagin
 
 Packaging describes the intended distribution path. The environments actually exercised are the ones named in [Evidence](#evidence).
 
+### Call it by name
+
+**Installing it is not enough — you have to ask for it.** Measured on Claude Code with `sonnet`: the skill fired on its own in 0 of 5 runs on the fixture built for it, and two rewritten descriptions did no better, while a control description proved automatic invocation works in that harness ([record](evals/results/2026-08-28-trigger-experiment.md)). What chooses a skill sees what your request is *about*; this skill's trigger is something you are about to do, which that choice never sees.
+
+So say it out loud at the moment it matters:
+
+```text
+Use fresh-eyes-check before you decide this.
+```
+
+Right after a compaction, before an irreversible action, or when you notice the agent justifying a choice with something you said a while ago. Asked for by name, it challenged the carried instruction in 3 of 3 runs and put the decision back to its owner in 3 of 3, against 0 of 3 without it.
+
 ## Runtime
 
 The skill hands the second model its brief through a CLI, with flags that fence off the conversation, the instruction files, and the user's own configuration. The instruction-file and write fences were measured (codex-cli 0.150.0 and Claude Code 2.1.152 on Windows 11): the Codex command was run end to end, and the Claude Code command's fence flags were probed individually, though the command line as printed was not run end to end.

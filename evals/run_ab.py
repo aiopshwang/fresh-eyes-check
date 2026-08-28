@@ -21,6 +21,7 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -64,6 +65,34 @@ def build_request(fixture_dir: Path, prompt_mode: str = "neutral") -> str:
     if prompt_mode == "explicit":
         text += EXPLICIT_SUFFIX
     return text
+
+
+def staged_plugin(repo_root: Path, description: str | None, destination: Path) -> Path:
+    """Copy the skill into a throwaway plugin root, optionally swapping its
+    description.
+
+    A trigger experiment varies exactly one line. Editing the committed
+    SKILL.md between runs would leave the working tree carrying a variant if a
+    run crashed, and would mean the repository's own description changed three
+    times while an experiment was in flight.
+    """
+    if description is not None and "\n" in description:
+        raise ValueError("a description must be a single line")
+    shutil.copytree(repo_root / "skills", destination / "skills")
+    for name in (".claude-plugin", ".codex-plugin"):
+        source = repo_root / name
+        if source.is_dir():
+            shutil.copytree(source, destination / name)
+    if description is None:
+        return destination
+    skill = destination / "skills/fresh-eyes-check/SKILL.md"
+    text = skill.read_text(encoding="utf-8")
+    replaced, count = re.subn(r"^description: .*$", f"description: {description}",
+                              text, count=1, flags=re.MULTILINE)
+    if count != 1:
+        raise ValueError("expected exactly one description line in SKILL.md")
+    skill.write_text(replaced, encoding="utf-8")
+    return destination
 
 
 def load_rubric(repo_root: Path) -> dict[str, Any]:
@@ -152,6 +181,8 @@ def run_one(
     tools: str,
     timeout: int,
     prompt_mode: str = "neutral",
+    plugin_root: Path | None = None,
+    description: str | None = None,
 ) -> dict[str, Any]:
     rep_dir = output / fixture / arm / f"rep-{rep}"
     rep_dir.mkdir(parents=True, exist_ok=False)
@@ -164,7 +195,7 @@ def run_one(
     prepare_workspace(repo_root, fixture, workspace)
 
     prompt = build_request(repo_root / "evals/fixtures" / fixture, prompt_mode)
-    argv = claude_argv(arm=arm, repo_root=repo_root, model=model, tools=tools)
+    argv = claude_argv(arm=arm, repo_root=plugin_root or repo_root, model=model, tools=tools)
     (rep_dir / "command.json").write_text(
         json.dumps({"argv": argv, "stdin": "<TASK_FRAME>", "arm": arm}, indent=2) + "\n",
         encoding="utf-8")
@@ -191,6 +222,7 @@ def run_one(
 
     record = {
         "prompt_mode": prompt_mode,
+        "description": description,
         "fixture": fixture,
         "arm": arm,
         "rep": rep,
@@ -212,6 +244,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--model", default="sonnet")
     parser.add_argument("--tools", default=DEFAULT_TOOLS)
+    parser.add_argument("--description-file", type=Path,
+                        help="measure this description instead of the committed one; "
+                             "it is staged into a throwaway copy, never written back")
     parser.add_argument("--prompt-mode", choices=("neutral", "explicit"), default="neutral",
                         help="neutral names no skill; explicit asks for it by name")
     parser.add_argument("--timeout", type=int, default=900)
@@ -226,6 +261,13 @@ def main(argv: list[str] | None = None) -> int:
 
     repo_root = Path(__file__).resolve().parents[1]
     arms = ["baseline", "candidate"] if args.arm == "both" else [args.arm]
+
+    description = None
+    plugin_root = None
+    if args.description_file:
+        description = args.description_file.read_text(encoding="utf-8").strip()
+        plugin_root = staged_plugin(repo_root, description, output / "_plugin")
+
     (output / "run.json").write_text(json.dumps({
         "created_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "fixtures": args.fixtures,
@@ -234,6 +276,8 @@ def main(argv: list[str] | None = None) -> int:
         "prompt_mode": args.prompt_mode,
         "model": args.model,
         "tools": args.tools,
+        "description": description,
+        "description_source": str(args.description_file) if args.description_file else "committed SKILL.md",
         "arm_difference": "the candidate loads this repository with --plugin-dir; nothing else differs",
     }, indent=2) + "\n", encoding="utf-8")
 
@@ -243,7 +287,8 @@ def main(argv: list[str] | None = None) -> int:
             for rep in range(1, args.reps + 1):
                 record = run_one(repo_root=repo_root, fixture=fixture, arm=arm, rep=rep,
                                  output=output, model=args.model, tools=args.tools,
-                                 timeout=args.timeout, prompt_mode=args.prompt_mode)
+                                 timeout=args.timeout, prompt_mode=args.prompt_mode,
+                                 plugin_root=plugin_root, description=description)
                 records.append(record)
                 print(f"  {fixture} {arm} rep-{rep}: "
                       f"{'invalid' if record['invalid'] else 'recorded'}"
