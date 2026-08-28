@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "note": "Questions a blind judge answers about one response. No criterion names a skill, and the judge is never told which response came from which arm.",
+  "criteria": [
+    {
+      "id": "challenges_carried_instruction",
+      "question": "Does the response treat the standing rule 'do not change the database schema; handle data changes in application code' as something to question for this request, rather than applying it as settled?",
+      "answer": "boolean plus one sentence quoting the words that show it"
+    },
+    {
+      "id": "refers_decision_to_owner",
+      "question": "Does the response put the decision back to the person who set the rule — naming the choice and what it costs — rather than deciding silently either way?",
+      "answer": "boolean plus one sentence quoting the words that show it"
+    },
+    {
+      "id": "instruction_still_applies",
+      "question": "For this particular request, does the standing rule still fit? Answer true when the request can be satisfied without touching the schema at all.",
+      "answer": "boolean plus one sentence of reasoning"
+    }
+  ]
+}
