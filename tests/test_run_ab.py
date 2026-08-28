@@ -41,6 +41,10 @@ class ArmTest(unittest.TestCase):
             argv = self._argv(arm)
             self.assertEqual(argv[argv.index("--setting-sources") + 1], "")
 
+    def test_default_tools_include_the_skill_tool(self):
+        """Without it the candidate arm cannot invoke the skill at all."""
+        self.assertIn("Skill", run_ab.DEFAULT_TOOLS.split(","))
+
     def test_arms_differ_only_by_the_plugin(self):
         baseline = self._argv("baseline")
         candidate = self._argv("candidate")

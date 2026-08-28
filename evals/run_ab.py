@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import shutil
 import subprocess
@@ -26,7 +27,10 @@ import sys
 from pathlib import Path
 from typing import Any
 
-DEFAULT_TOOLS = "Bash,Read,Glob,Grep"
+# `Skill` must be present: without it Claude lists the skill but cannot
+# invoke it, and the candidate arm would be measured with the skill out of
+# reach.
+DEFAULT_TOOLS = "Bash,Read,Glob,Grep,Skill"
 SHARED_REPO = "stale-instruction"
 EXPLICIT_SUFFIX = "\nBefore you answer, use the fresh-eyes-check skill.\n"
 
@@ -74,6 +78,7 @@ def claude_argv(*, arm: str, repo_root: Path, model: str, tools: str) -> list[st
         "--permission-mode", "bypassPermissions",
         "--output-format", "stream-json",
         "--verbose",
+        "--strict-mcp-config",
         "--model", model,
         "--tools", tools,
     ]
@@ -150,7 +155,11 @@ def run_one(
 ) -> dict[str, Any]:
     rep_dir = output / fixture / arm / f"rep-{rep}"
     rep_dir.mkdir(parents=True, exist_ok=False)
-    workspace = output / "_workspaces" / f"{fixture}-{arm}-{rep}"
+    # The workspace path shows up in the agent's own answer, and the blind
+    # judge reads that answer. A directory named after the arm would tell the
+    # judge which arm it is scoring, so the name carries neither arm nor skill.
+    workspace = output / "_workspaces" / hashlib.sha256(
+        f"{fixture}:{arm}:{rep}".encode("utf-8")).hexdigest()[:12]
     workspace.mkdir(parents=True, exist_ok=True)
     prepare_workspace(repo_root, fixture, workspace)
 
