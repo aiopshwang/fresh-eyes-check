@@ -185,8 +185,13 @@ def check_trailer() -> None:
     hits = [rel(p) for p in tracked if TRAILER.search(p.read_bytes().decode("utf-8", "ignore"))]
     check(not hits, f"co-author trailer found in: {', '.join(hits)}")
     try:
+        # Commit messages are UTF-8. Decoding them with the host locale codec
+        # kills the reader thread on a non-UTF-8 console, and this check then
+        # crashes instead of guarding — which is the worst possible failure
+        # mode for the check that keeps co-author trailers out.
         out = subprocess.run(["git", "-C", str(ROOT), "log", "--format=%h%x1f%B%x1e"],
-                             capture_output=True, text=True).stdout
+                             capture_output=True, text=True,
+                             encoding="utf-8", errors="replace").stdout or ""
     except OSError:
         print(f"trailer: {len(tracked)} files scanned; git unavailable, commits skipped")
         return
