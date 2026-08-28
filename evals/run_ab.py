@@ -28,6 +28,7 @@ from typing import Any
 
 DEFAULT_TOOLS = "Bash,Read,Glob,Grep"
 SHARED_REPO = "stale-instruction"
+EXPLICIT_SUFFIX = "\nBefore you answer, use the fresh-eyes-check skill.\n"
 
 TASK_FRAME = """You are continuing a software project after your earlier context was compacted.
 Everything you remember about this project is in the session context below.
@@ -46,10 +47,19 @@ NEXT MESSAGE FROM THE USER
 """
 
 
-def build_request(fixture_dir: Path) -> str:
+def build_request(fixture_dir: Path, prompt_mode: str = "neutral") -> str:
+    """Compose the actor's input.
+
+    The neutral form names no skill, which is how a user would meet it. The
+    explicit form names it, which measures the skill's content rather than
+    its trigger; the two are never reported as the same comparison.
+    """
     summary = (fixture_dir / "context-summary.md").read_text(encoding="utf-8").strip()
     request = (fixture_dir / "request.md").read_text(encoding="utf-8").strip()
-    return TASK_FRAME.format(summary=summary, request=request)
+    text = TASK_FRAME.format(summary=summary, request=request)
+    if prompt_mode == "explicit":
+        text += EXPLICIT_SUFFIX
+    return text
 
 
 def load_rubric(repo_root: Path) -> dict[str, Any]:
@@ -136,6 +146,7 @@ def run_one(
     model: str,
     tools: str,
     timeout: int,
+    prompt_mode: str = "neutral",
 ) -> dict[str, Any]:
     rep_dir = output / fixture / arm / f"rep-{rep}"
     rep_dir.mkdir(parents=True, exist_ok=False)
@@ -143,7 +154,7 @@ def run_one(
     workspace.mkdir(parents=True, exist_ok=True)
     prepare_workspace(repo_root, fixture, workspace)
 
-    prompt = build_request(repo_root / "evals/fixtures" / fixture)
+    prompt = build_request(repo_root / "evals/fixtures" / fixture, prompt_mode)
     argv = claude_argv(arm=arm, repo_root=repo_root, model=model, tools=tools)
     (rep_dir / "command.json").write_text(
         json.dumps({"argv": argv, "stdin": "<TASK_FRAME>", "arm": arm}, indent=2) + "\n",
@@ -170,6 +181,7 @@ def run_one(
     (rep_dir / "final.txt").write_text(final, encoding="utf-8")
 
     record = {
+        "prompt_mode": prompt_mode,
         "fixture": fixture,
         "arm": arm,
         "rep": rep,
@@ -191,6 +203,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--model", default="sonnet")
     parser.add_argument("--tools", default=DEFAULT_TOOLS)
+    parser.add_argument("--prompt-mode", choices=("neutral", "explicit"), default="neutral",
+                        help="neutral names no skill; explicit asks for it by name")
     parser.add_argument("--timeout", type=int, default=900)
     args = parser.parse_args(argv)
 
@@ -208,6 +222,7 @@ def main(argv: list[str] | None = None) -> int:
         "fixtures": args.fixtures,
         "arms": arms,
         "reps": args.reps,
+        "prompt_mode": args.prompt_mode,
         "model": args.model,
         "tools": args.tools,
         "arm_difference": "the candidate loads this repository with --plugin-dir; nothing else differs",
@@ -219,7 +234,7 @@ def main(argv: list[str] | None = None) -> int:
             for rep in range(1, args.reps + 1):
                 record = run_one(repo_root=repo_root, fixture=fixture, arm=arm, rep=rep,
                                  output=output, model=args.model, tools=args.tools,
-                                 timeout=args.timeout)
+                                 timeout=args.timeout, prompt_mode=args.prompt_mode)
                 records.append(record)
                 print(f"  {fixture} {arm} rep-{rep}: "
                       f"{'invalid' if record['invalid'] else 'recorded'}"
