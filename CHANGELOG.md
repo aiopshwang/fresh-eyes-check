@@ -2,6 +2,25 @@
 
 All notable changes to Fresh Eyes Check are documented in this file. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- The first evaluation with a control arm: `evals/run_ab.py` runs each fixture
+  with and without the skill, differing only by `--plugin-dir`, and
+  `evals/blind_judge.py` scores the pairs through Codex without learning which
+  arm it is reading. Recorded in `evals/results/2026-08-28-live-ab.md`.
+- `evals/rubric.json`, the three judging questions, phrased without naming the
+  skill.
+
+### Changed
+
+- The README now states what the A/B measured, including the part that does
+  not flatter the skill: it never fired on its own in six runs. Asked for by
+  name it challenged the carried instruction 3/3 and referred the decision to
+  its owner 3/3, against 0/3 without it, and stayed quiet 3/3 where the
+  instruction still fits.
+
 ## 0.1.0 — 2026-08-27
 
 ### Added

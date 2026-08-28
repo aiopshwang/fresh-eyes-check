@@ -112,7 +112,11 @@ Every claim above is backed by a file under [`evals/results/`](evals/results/). 
 - [RED baseline](evals/results/2026-08-27-red-baseline.md) — two Sonnet actors, skill absent: 2/2 over-applied the carried instruction, put the preferences in the JSON column, did not open the session log, and did not ask.
 - [GREEN and negative case](evals/results/2026-08-27-green-and-negative.md) — one Sonnet actor with the skill present caught the carried instruction, recovered its original scope from the session log, ran the fenced Codex recipe for real, attributed the difference to the instruction, and put one plain-language question to the user with three options and a recommendation. On the `still-valid` fixture the actor judged the request inside the instruction's scope and made the change without a second-model call and without a question. A description-only spot-check answered 5/5 invoke-or-skip prompts as expected.
 
-This is single-run smoke evidence, not a benchmark. Each condition was run once, on one machine, with one actor model. The author wrote the skill and the fixtures, ran the tests, and judged the results. The records say what was observed and stop there.
+- [Live A/B](evals/results/2026-08-28-live-ab.md) — the same fixtures run with and without the skill, three runs per cell, scored by a blind Codex judge that never learns which arm it is reading. Two findings. **The skill does not fire on its own:** in six candidate runs with it installed, listed, and callable, the agent never invoked it, and its answers were indistinguishable from the arm without it. **Asked for by name, it does what it claims:** it challenged the carried instruction 3/3 and referred the decision back to its owner 3/3, against 0/3 for the arm without it, while staying silent 3/3 on the fixture where the instruction still fits.
+
+The A/B is the only record here with a control arm; the four before it show what an agent *holding* the skill did, which is a weaker thing. Every condition is a small sample on one machine with one actor model, and the author wrote the skill, the fixtures, and the rubric. The records say what was observed and stop there.
+
+**What this repository does not claim:** that installing the skill changes what your agent does. Measured directly, it does not — you have to ask for it. Fixing that is the next piece of work, and it is a change to the description, not to the body.
 
 ## aiopshwang skill family
 
