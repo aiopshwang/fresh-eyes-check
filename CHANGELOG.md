@@ -12,6 +12,12 @@ All notable changes to Fresh Eyes Check are documented in this file. The format 
   arm it is reading. Recorded in `evals/results/2026-08-28-live-ab.md`.
 - `evals/rubric.json`, the three judging questions, phrased without naming the
   skill.
+- A trigger experiment, recorded in
+  `evals/results/2026-08-28-trigger-experiment.md`: two rewritten descriptions
+  measured against the committed one, each 0 of 5 activations, with a control
+  description firing 2 of 2 to prove the harness could have detected a win.
+  `evals/run_ab.py --description-file` stages a variant into a throwaway
+  plugin root so the committed skill never moves during an experiment.
 
 ### Changed
 
@@ -20,6 +26,9 @@ All notable changes to Fresh Eyes Check are documented in this file. The format 
   name it challenged the carried instruction 3/3 and referred the decision to
   its owner 3/3, against 0/3 without it, and stayed quiet 3/3 where the
   instruction still fits.
+- The README leads with how to call the skill by name and says why: what
+  chooses a skill sees what the request is about, and this skill's trigger is
+  something the agent is about to do.
 
 ## 0.1.0 — 2026-08-27
 
