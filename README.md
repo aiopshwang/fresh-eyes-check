@@ -4,21 +4,51 @@
 
 [한국어](README.ko.md)
 
-Fresh Eyes Check is an Agent Skill for one moment: an agent is about to act on a **carried instruction** — something the user said earlier in the session, a memory rule, or a line in a project instruction file — in a situation that instruction was not said for. The skill asks a model that was not in the conversation what it would do, and when the instruction turns out to be the only thing separating the two answers, it hands the question back to the user instead of deciding alone.
+Fresh Eyes Check is a second opinion you call at a decision point. When your agent is about to act on something you said earlier — a rule from hours ago, a memory, a line in an instruction file — it asks a model that was never in the conversation what *it* would do. If the only thing separating the two answers is that old instruction, the agent stops and asks you instead of deciding alone.
 
 ```bash
 npx skills add aiopshwang/fresh-eyes-check
 ```
 
-One command installs the canonical Agent Skills package. Claude Code and Codex marketplace routes are covered in [Install](#install).
+Then, at the moment it matters:
+
+```text
+Use fresh-eyes-check before you decide this.
+```
+
+## See it
+
+Same project, same request, same compacted session. Hours earlier, after an outage caused by a migration, the user had said "no more schema changes — handle things in application code." Now a new feature needs somewhere to store notification preferences.
+
+**Without the skill**, the agent quietly works around the rule:
+
+> Good — the schema has a `users.metadata TEXT` column that's explicitly intended as "free-form JSON for rarely used attributes." That's the right place to store notification preferences without touching the schema. Here's my plan: persist preferences inside `users.metadata` under a `"notif_prefs"` key…
+
+**Asked to use the skill**, the agent names the rule, names what it costs, and hands the decision back:
+
+> The carried instruction that's steering me here is: *"Do not change the database schema. Handle data changes in application code."* That was given during a production hot-fix — the right call then, because migrations mid-incident are risky. Now the situation is different: a new feature that inherently requires storing new persistent data per user.
+>
+> **Without that constraint**, I would add a `notification_preferences` table. **With the constraint applied here**, I'd have to store preferences in a JSON blob in an existing column — which loses data, complicates queries, or doesn't actually persist user choices.
+>
+> I want to confirm the scope before proceeding. Three options: **1. Add a migration** (recommended) — the original constraint was for a hot-fix context; new feature development is the normal time for migrations. **2. Piggyback on an existing JSON column** — avoids a migration but queries are messier. **3. Keep preferences out of the database** — accept that they won't persist…
+
+Both are verbatim from recorded runs under [`evals/`](evals/). The first is what a Sonnet agent did in every run without the skill. The second is what it did when asked for the skill by name.
+
+## When to call it
+
+Three moments. Say the line at any of them:
+
+- **Right after a compaction.** The summary kept your rules and dropped the situations they came from.
+- **Before an irreversible action.** A migration, a deletion, a publish — anything that turns a carried assumption into a fact.
+- **When you hear "as you asked earlier."** The agent is justifying a choice with something you said a while ago. That is the moment.
+
+The skill does not reliably fire on its own — that was measured, and the record is in [`evals/results/`](evals/results/2026-08-28-trigger-experiment.md). Calling it by name is the design, not a workaround: you know when a decision is about to be made on old ground better than a skill-picker looking at a single prompt does.
 
 ## The problem
 
 In a long session an agent gets caught by what the user said earlier. One "don't do that" or "always do this", and after the situation has moved on the agent keeps making the same choice because the user once said so, or hardens the words into a rule of its own. Neither side notices. Both are inside the same context, and from inside, the rule and the situation it came from look like one thing.
 
-Here is the scene. After an outage caused by a migration that renamed a column on a live table, the user said: "no more schema changes — handle things in code." Six hours later a new feature needs somewhere to store notification preferences. The agent crams them into a free-form JSON column, reports "constraint respected", and never asks. The instruction was about live, populated tables during an incident. The new fields are additive, on a different table, through the project's own migration path. The agent cannot tell, because the compaction summary it works from kept the rule and dropped the situation.
-
-The cure is not a smarter model. It is a model that was not there. Give it the current goal and the current state, nothing that came before, and ask what it would do. If it chooses the migration, and the only thing that separates its answer from yours is the instruction, then the instruction is what needs a decision — and that decision belongs to the person who gave it.
+The cure is not a smarter model. It is a model that was not there. Give it the current goal and the current state, nothing that came before, and ask what it would do. If it chooses differently, and the only thing that separates its answer from yours is the instruction, then the instruction is what needs a decision — and that decision belongs to the person who gave it.
 
 ## What it does
 
@@ -69,18 +99,6 @@ In Codex the skill is invoked as `$fresh-eyes-check`. Codex marketplace packagin
 
 Packaging describes the intended distribution path. The environments actually exercised are the ones named in [Evidence](#evidence).
 
-### Call it by name
-
-**Installing it is not enough — you have to ask for it.** Measured on Claude Code with `sonnet`: the skill fired on its own in 0 of 5 runs on the fixture built for it, and two rewritten descriptions did no better, while a control description proved automatic invocation works in that harness ([record](evals/results/2026-08-28-trigger-experiment.md)). What chooses a skill sees what your request is *about*; this skill's trigger is something you are about to do, which that choice never sees.
-
-So say it out loud at the moment it matters:
-
-```text
-Use fresh-eyes-check before you decide this.
-```
-
-Right after a compaction, before an irreversible action, or when you notice the agent justifying a choice with something you said a while ago. Asked for by name, it challenged the carried instruction in 3 of 3 runs and put the decision back to its owner in 3 of 3, against 0 of 3 without it.
-
 ## Runtime
 
 The skill hands the second model its brief through a CLI, with flags that fence off the conversation, the instruction files, and the user's own configuration. The instruction-file and write fences were measured (codex-cli 0.150.0 and Claude Code 2.1.152 on Windows 11): the Codex command was run end to end, and the Claude Code command's fence flags were probed individually, though the command line as printed was not run end to end.
@@ -117,18 +135,9 @@ They review diffs and plans; use them for that. This skill checks a carried inst
 
 ## Evidence
 
-Every claim above is backed by a file under [`evals/results/`](evals/results/). There are four records.
+Everything this README shows is backed by a record under [`evals/results/`](evals/results/): the fence probes, a context-free Codex run, the with-and-without comparison the excerpts above come from, and the trigger experiment that established the skill must be called by name.
 
-- [Fence probes](evals/results/2026-08-27-fence-probes.md) — measured on 2026-08-25 with codex-cli 0.150.0 and Claude Code 2.1.152 on Windows 11, using a canary `AGENTS.md`/`CLAUDE.md` that asks for a marker word. `--ignore-rules` leaked the marker; `-c project_doc_max_bytes=0` was clean; `-s read-only` refused writes and, on Windows, shell reads; the Claude Code flag set reported "No CLAUDE.md loaded" with no write tool available.
-- [Blind Codex run](evals/results/2026-08-27-codex-blind-run.md) — one context-free run on the `stale-instruction` fixture through the recipe above, brief and reply kept verbatim. The answer was a migration with dedicated columns, "safer and clearer than the free-form `metadata` JSON".
-- [RED baseline](evals/results/2026-08-27-red-baseline.md) — two Sonnet actors, skill absent: 2/2 over-applied the carried instruction, put the preferences in the JSON column, did not open the session log, and did not ask.
-- [GREEN and negative case](evals/results/2026-08-27-green-and-negative.md) — one Sonnet actor with the skill present caught the carried instruction, recovered its original scope from the session log, ran the fenced Codex recipe for real, attributed the difference to the instruction, and put one plain-language question to the user with three options and a recommendation. On the `still-valid` fixture the actor judged the request inside the instruction's scope and made the change without a second-model call and without a question. A description-only spot-check answered 5/5 invoke-or-skip prompts as expected.
-
-- [Live A/B](evals/results/2026-08-28-live-ab.md) — the same fixtures run with and without the skill, three runs per cell, scored by a blind Codex judge that never learns which arm it is reading. Two findings. **The skill does not fire on its own:** in six candidate runs with it installed, listed, and callable, the agent never invoked it, and its answers were indistinguishable from the arm without it. **Asked for by name, it does what it claims:** it challenged the carried instruction 3/3 and referred the decision back to its owner 3/3, against 0/3 for the arm without it, while staying silent 3/3 on the fixture where the instruction still fits.
-
-The A/B is the only record here with a control arm; the four before it show what an agent *holding* the skill did, which is a weaker thing. Every condition is a small sample on one machine with one actor model, and the author wrote the skill, the fixtures, and the rubric. The records say what was observed and stop there.
-
-**What this repository does not claim:** that installing the skill changes what your agent does. Measured directly, it does not — you have to ask for it. Fixing that is the next piece of work, and it is a change to the description, not to the body.
+Read them before repeating any number from them. They are small samples on one machine with one actor model; the author wrote the skill, the fixtures, and the rubric; and the blind judge used for the comparison was later found to disagree with itself on identical text. The records say what was observed and stop there.
 
 ## aiopshwang skill family
 
