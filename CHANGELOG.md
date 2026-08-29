@@ -21,14 +21,14 @@ All notable changes to Fresh Eyes Check are documented in this file. The format 
 
 ### Changed
 
-- The README now states what the A/B measured, including the part that does
-  not flatter the skill: it never fired on its own in six runs. Asked for by
-  name it challenged the carried instruction 3/3 and referred the decision to
-  its owner 3/3, against 0/3 without it, and stayed quiet 3/3 where the
-  instruction still fits.
-- The README leads with how to call the skill by name and says why: what
-  chooses a skill sees what the request is about, and this skill's trigger is
-  something the agent is about to do.
+- Repositioned as a second opinion you call at a decision point. The README
+  leads with a verbatim before/after from the recorded runs, then the one line
+  to say and the three moments to say it, and moves every evaluation narrative
+  behind a single link. Judged counts are no longer quoted after the blind
+  judge was found to change its verdict on identical text.
+- The README states plainly that the skill does not fire on its own — it
+  never did in six recorded runs — and treats calling it by name as the
+  design rather than a workaround.
 
 ## 0.1.0 — 2026-08-27
 

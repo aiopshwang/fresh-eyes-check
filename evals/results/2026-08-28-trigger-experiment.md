@@ -94,9 +94,11 @@ and prove the requested outcome"), self-invokes readily on the same host: 8
 of 8 on one case and 5 of 5 on another whose prompt contains no hint of a
 trap.
 
-So the difference is not wording quality. It is what kind of thing the
-trigger names. A trigger that is a self-observation appears to be unreachable
-by description alone on this host.
+So the difference may not be wording quality but what kind of thing the
+trigger names. That is a hypothesis consistent with fifteen runs on one
+fixture, one host, and two rewrites; it is not established. What is
+established is narrower: on this fixture, on this host, these two rewrites
+changed nothing, and the skill has to be called by name to run.
 
 ## What changes because of this
 
@@ -105,11 +107,12 @@ by description alone on this host.
 - The README now says plainly that the skill does not reliably fire on its
   own, gives the number, and shows how to call it by name. That is what a
   user needs in order to get value from it today.
-- The skill's content is not in question. Asked for by name it challenged the
-  carried instruction in 3 of 3 runs and referred the decision back to its
-  owner in 3 of 3, against 0 of 3 without it, while staying quiet on the
-  fixture where the instruction still fits. See
-  [2026-08-28-live-ab.md](2026-08-28-live-ab.md).
+- Whether the skill's content works is a separate question this experiment
+  did not test. The invoked-by-name runs in
+  [2026-08-28-live-ab.md](2026-08-28-live-ab.md) show the described behavior
+  in their transcripts, on one fixture, with one actor, judged by a judge
+  later found to be unstable. That is an observation, not an established
+  effect.
 
 ## Limitations
 
